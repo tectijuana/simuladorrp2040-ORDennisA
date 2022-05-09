@@ -1,32 +1,29 @@
-import rp2
-from machine import Pin
-from rp2 import PIO
 import time
+import board
+import digitalio
 
-@rp2.asm_pio(out_init=[PIO.OUT_LOW])
-def echo():
-    wrap_target()
-    mov(pins, isr)     
-    mov(isr, invert(isr))
-    pull(noblock)      
-    mov(x, osr)
-    mov(y, x)
-    label("loop")
-    jmp(y_dec, "loop")  
-    wrap()
+red_led = digitalio.DigitalInOut(board.GP12)
+red_led.direction = digitalio.Direction.OUTPUT
+amber_led = digitalio.DigitalInOut(board.GP13)
+amber_led.direction = digitalio.Direction.OUTPUT
+green_led = digitalio.DigitalInOut(board.GP14)
+green_led.direction = digitalio.Direction.OUTPUT
 
-sm = rp2.StateMachine(0, echo, freq=1_000_000, out_base=Pin(7))
-sm.active(1)
+button = digitalio.DigitalInOut(board.GP28)
+button.switch_to_input(pull=digitalio.Pull.DOWN)
 
-def play(freq):
-  if freq:
-    sm.put(1_000_000//freq)
-  else:
-    sm.put(0)
-
-
-play(500)
-time.sleep(1)
-play(1000)
-time.sleep(1)
-play(0)
+while True:
+    print(button.value)
+    time.sleep(0.5)
+    red_led.value = True
+    time.sleep(5)
+    amber_led.value = True
+    time.sleep(2)
+    red_led.value = False
+    amber_led.value = False
+    green_led.value = True
+    time.sleep(5)
+    green_led.value = False
+    amber_led.value = True
+    time.sleep(3)
+    amber_led.value = False
